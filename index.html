@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Padel Analysis — Workspace Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0b1210;
+    --bg-2: #0f1a17;
+    --turf: #153b2e;
+    --turf-2: #1c4a39;
+    --line: #f4f1e8;
+    --ball: #d7e85c;
+    --ink: #eef2ee;
+    --muted: #8fa39b;
+    --muted-dim: #5d7269;
+    --radius: 4px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 20% -10%, rgba(46,140,104,0.16), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(215,232,92,0.05), transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    font-family: 'Source Sans 3', sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap{
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 64px 28px 80px;
+  }
+
+  /* ---- Header ---- */
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap: 24px;
+    border-bottom: 1px solid rgba(244,241,232,0.12);
+    padding-bottom: 28px;
+    margin-bottom: 56px;
+    flex-wrap: wrap;
+  }
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 4.4vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+  }
+  h1 span{ color: var(--ball); }
+  header p{
+    margin:0;
+    max-width: 480px;
+    color: var(--muted);
+    font-size: 0.98rem;
+    line-height: 1.55;
+  }
+  .hub-link{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 0.82rem;
+    color: var(--muted);
+    text-decoration: none;
+    border: 1px solid rgba(244,241,232,0.22);
+    border-radius: var(--radius);
+    padding: 9px 14px;
+    white-space: nowrap;
+    transition: border-color .15s ease, color .15s ease;
+  }
+  .hub-link:hover{ border-color: var(--ball); color: var(--ball); }
+
+  /* ---- Map ---- */
+  .map{
+    position: relative;
+    padding: 20px 0 10px;
+  }
+  svg.connectors{
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+  svg.connectors path{
+    fill:none;
+    stroke: rgba(143,163,155,0.5);
+    stroke-width: 1.5;
+    stroke-dasharray: 3 5;
+  }
+  svg.connectors path.live{ stroke: rgba(215,232,92,0.55); }
+
+  .hub{
+    position: relative;
+    z-index: 2;
+    width: 220px;
+    margin: 0 auto 72px;
+    text-align: center;
+  }
+  .hub-node{
+    background: linear-gradient(180deg, var(--turf-2), var(--turf));
+    border: 1px solid rgba(244,241,232,0.25);
+    border-radius: var(--radius);
+    padding: 22px 16px 18px;
+    position: relative;
+  }
+  .hub-node::before{
+    content:"";
+    position:absolute;
+    top:0; left:14px; right:14px;
+    height: 2px;
+    background: var(--ball);
+    opacity: 0.85;
+  }
+  .hub-node svg{ width: 30px; height: 30px; color: var(--ball); margin-bottom: 8px; }
+  .hub-node .label{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  .hub-node .sub{
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  .row{
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  @media (max-width: 860px){
+    .row{ grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+  }
+
+  .tile{
+    display:block;
+    text-decoration: none;
+    color: inherit;
+    background: var(--bg-2);
+    border: 1px solid rgba(244,241,232,0.14);
+    border-radius: var(--radius);
+    padding: 20px 20px 18px;
+    transition: transform .18s ease, border-color .18s ease, background .18s ease;
+    position: relative;
+  }
+  .tile:hover{
+    transform: translateY(-3px);
+    border-color: rgba(215,232,92,0.55);
+    background: #101c18;
+  }
+  .tile:hover .arrow{ transform: translate(2px,-2px); opacity: 1; }
+
+  .tile .top{
+    display:flex;
+    justify-content: space-between;
+    align-items:flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .tile h2{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 1.08rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+  .status{
+    flex-shrink:0;
+    font-size: 0.68rem;
+    font-family:'Space Grotesk', sans-serif;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    line-height: 1.5;
+  }
+  .status.private{ color: var(--muted); }
+  .status.public{ color: var(--ball); }
+
+  .tile p{
+    margin: 0 0 16px;
+    color: var(--muted);
+    font-size: 0.87rem;
+    line-height: 1.55;
+  }
+  .tile .meta{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    font-size: 0.76rem;
+    color: var(--muted-dim);
+    border-top: 1px dashed rgba(244,241,232,0.14);
+    padding-top: 12px;
+  }
+  .tile .owner{ font-family: monospace, monospace; }
+  .arrow{
+    opacity: 0.5;
+    transition: transform .18s ease, opacity .18s ease;
+  }
+
+  footer{
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(244,241,232,0.1);
+    color: var(--muted-dim);
+    font-size: 0.8rem;
+    display:flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Padel <span>Analysis</span></h1>
+      <p>Three sub-projects, one shared match dataset. Each repo keeps its own history and its own Python environment — click a tile to open its repository.</p>
+    </div>
+    <a class="hub-link" href="https://github.com/MRezaJVD/Padel-Analysis" target="_blank" rel="noopener">Padel-Analysis (hub repo) ↗</a>
+  </header>
+
+  <div class="map" id="map">
+    <svg class="connectors" id="connectors"></svg>
+
+    <div class="hub" id="hubNode">
+      <div class="hub-node">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+        <div class="label">data_folder</div>
+        <div class="sub">shared match video &amp; tracking data — read by every sub-project below</div>
+      </div>
+    </div>
+
+    <div class="row" id="tiles">
+      <a class="tile" data-id="cv" href="https://github.com/MRezaJVD/Padel_CV" target="_blank" rel="noopener">
+        <div class="top">
+          <h2>Padel_CV</h2>
+          <span class="status private">Private</span>
+        </div>
+        <p>Extracts 2D positional tracking data for players from a recorded mono-camera match video.</p>
+        <div class="meta"><span class="owner">MRezaJVD</span><span class="arrow">Open repo ↗</span></div>
+      </a>
+
+      <a class="tile" data-id="va" href="https://github.com/MRezaJVD/Padel_VA" target="_blank" rel="noopener">
+        <div class="top">
+          <h2>Padel_VA</h2>
+          <span class="status private">Private</span>
+        </div>
+        <p>Query-based visualization of the tracked match data — shot angles, hitter identification, replay lookup.</p>
+        <div class="meta"><span class="owner">MRezaJVD</span><span class="arrow">Open repo ↗</span></div>
+      </a>
+
+      <a class="tile" data-id="ml" href="https://github.com/carlosandujar/Imitation-learning-using-ML-agent" target="_blank" rel="noopener">
+        <div class="top">
+          <h2>Imitation-learning-using-ML-agent</h2>
+          <span class="status public">Public · fork</span>
+        </div>
+        <p>Reinforcement &amp; imitation learning with ML-Agents inside a virtual padel environment.</p>
+        <div class="meta"><span class="owner">carlosandujar</span><span class="arrow">Open repo ↗</span></div>
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <span>Local layout: each repo lives in its own folder beside <code>data_folder</code>, with its own virtual env.</span>
+    <span id="updated"></span>
+  </footer>
+
+</div>
+
+<script>
+  function drawConnectors(){
+    const svg = document.getElementById('connectors');
+    const map = document.getElementById('map');
+    const hub = document.getElementById('hubNode');
+    const tiles = document.querySelectorAll('#tiles .tile');
+    const mapRect = map.getBoundingClientRect();
+
+    svg.innerHTML = '';
+    svg.setAttribute('viewBox', `0 0 ${mapRect.width} ${mapRect.height}`);
+
+    const hubRect = hub.getBoundingClientRect();
+    const startX = hubRect.left - mapRect.left + hubRect.width / 2;
+    const startY = hubRect.bottom - mapRect.top;
+
+    tiles.forEach(tile => {
+      const r = tile.getBoundingClientRect();
+      const endX = r.left - mapRect.left + r.width / 2;
+      const endY = r.top - mapRect.top;
+      const midY = startY + (endY - startY) * 0.55;
+
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M ${startX} ${startY} C ${startX} ${midY}, ${endX} ${midY}, ${endX} ${endY}`);
+      svg.appendChild(path);
+    });
+  }
+
+  window.addEventListener('load', drawConnectors);
+  window.addEventListener('resize', drawConnectors);
+
+  document.getElementById('updated').textContent =
+    'map generated ' + new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+</script>
+</body>
+</html>
