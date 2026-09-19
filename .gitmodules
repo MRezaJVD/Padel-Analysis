@@ -1,0 +1,9 @@
+[submodule "Padel_CV"]
+	path = Padel_CV
+	url = git@github.com:MRezaJVD/Padel_CV.git
+[submodule "Padel_VA"]
+	path = Padel_VA
+	url = git@github.com:MRezaJVD/Padel_VA.git
+[submodule "ML-agent"]
+	path = ML-agent
+	url = git@github.com:carlosandujar/Imitation-learning-using-ML-agent.git
